@@ -18,4 +18,11 @@ class Post(models.Model):
     updated_at = models.DateTimeField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     tags = models.ManyToManyField(PostTag)
-    likes = models.ManyToManyField(User)
+    # todo require
+    artwork = models.ImageField(upload_to='artworks/', null=True, blank=True)
+
+
+class Like(models.Model):
+    created_at = models.DateTimeField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
