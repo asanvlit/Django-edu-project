@@ -1,13 +1,20 @@
 from django.contrib.auth import get_user_model, authenticate, login, logout
-from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
 
-from web.forms import RegistrationForm, AuthForm
+from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm
+from web.models import Post, PostTag
 
 User = get_user_model()
 
 
+@login_required
 def main_view(request):
-    return render(request, "web/main.html")
+    posts = Post.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, "web/main.html", {
+        'posts': posts,
+        'form': PostForm()
+    })
 
 
 def registration_view(request):
@@ -45,3 +52,41 @@ def auth_view(request):
 def logout_view(request):
     logout(request)
     return redirect("main")
+
+
+@login_required
+def post_edit_view(request, id=None):
+    post = get_object_or_404(Post, user=request.user, id=id) if id is not None else None
+    form = PostForm(instance=post)
+    if request.method == 'POST':
+        form = PostForm(data=request.POST, files=request.FILES, instance=post, initial={"user": request.user})
+        if form.is_valid():
+            form.save()
+            return redirect("main")
+    return render(request, "web/post_form.html", {"form": form})
+
+
+@login_required
+def post_delete_view(request, id):
+    post = get_object_or_404(Post, user=request.user, id=id)
+    post.delete()
+    return redirect('main')
+
+
+@login_required
+def tags_view(request):
+    tags = PostTag.objects.filter(user=request.user)
+    form = PostTagForm()
+    if request.method == 'POST':
+        form = PostTagForm(data=request.POST, initial={"user": request.user})
+        if form.is_valid():
+            form.save()
+            return redirect('tags')
+    return render(request, "web/tags.html", {"tags": tags, "form": form})
+
+
+@login_required
+def tags_delete_view(request, id):
+    tag = get_object_or_404(PostTag, user=request.user, id=id)
+    tag.delete()
+    return redirect('tags')

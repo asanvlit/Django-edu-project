@@ -1,0 +1,9 @@
+{% extends 'web/base.html' %}
+{% block content %}
+    <h2>Публикация работы</h2>
+    <form action="" method="post" enctype="multipart/form-data">
+        {%  csrf_token %}
+        {{ form.as_p }}
+        <button>Создать</button>
+    </form>
+{% endblock %}
