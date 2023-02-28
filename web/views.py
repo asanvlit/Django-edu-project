@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.shortcuts import render, redirect
 
 from web.forms import RegistrationForm, AuthForm, PostForm
-from web.models import Post
+from web.models import Post, PostTag
 
 User = get_user_model()
 
@@ -55,8 +55,13 @@ def post_edit_view(request, id=None):
     post = Post.objects.get(id=id) if id is not None else None
     form = PostForm(instance=post)
     if request.method == 'POST':
-        form = PostForm(data=request.POST, instance=post, initial={"user": request.user})
+        form = PostForm(data=request.POST, files=request.FILES, instance=post, initial={"user": request.user})
         if form.is_valid():
             form.save()
             return redirect("main")
     return render(request, "web/post_form.html", {"form": form})
+
+
+def tags_view(request):
+    tags = PostTag.objects.all()
+    return render(request, "web/tags.html", {"tags": tags})

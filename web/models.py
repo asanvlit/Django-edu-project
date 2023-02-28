@@ -10,18 +10,18 @@ class PostTag(models.Model):
 
 
 class Post(models.Model):
-    art_type = models.CharField(max_length=50)
-    hours_spent = models.IntegerField()
-    used_material = models.TextField()
-    description = models.TextField()
+    art_type = models.CharField(max_length=50, verbose_name='Тип работы')
+    hours_spent = models.IntegerField(verbose_name='Потрачено часов')
+    used_material = models.TextField(verbose_name='Использованные материалы')
+    description = models.TextField(verbose_name='Описание')
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True, auto_now=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    tags = models.ManyToManyField(PostTag)
-    artwork = models.ImageField(upload_to='artworks/', null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    tags = models.ManyToManyField(PostTag, verbose_name='Теги')
+    artwork = models.ImageField(upload_to='artworks/', null=True, blank=True, verbose_name='Работа')
 
 
 class Like(models.Model):
     created_at = models.DateTimeField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name='Пост')

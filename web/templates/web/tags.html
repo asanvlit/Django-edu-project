@@ -1,0 +1,9 @@
+{% extends 'web/base.html' %}
+{% block content %}
+    <h2>Теги</h2>
+    <ul>
+        {%  for tag in tags %}
+            <li>{{ tag.title }}</li>
+        {%  endfor %}
+    </ul>
+{% endblock %}
