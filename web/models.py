@@ -5,8 +5,14 @@ User = get_user_model()
 
 
 class PostTag(models.Model):
-    # todo enum for tags
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=256, verbose_name='Название')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь', null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'тег'
 
 
 class Post(models.Model):
