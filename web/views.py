@@ -1,13 +1,17 @@
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.shortcuts import render, redirect
 
-from web.forms import RegistrationForm, AuthForm
+from web.forms import RegistrationForm, AuthForm, PostForm
+from web.models import Post
 
 User = get_user_model()
 
 
 def main_view(request):
-    return render(request, "web/main.html")
+    posts = Post.objects.all()
+    return render(request, "web/main.html", {
+        'posts': posts
+    })
 
 
 def registration_view(request):
@@ -45,3 +49,13 @@ def auth_view(request):
 def logout_view(request):
     logout(request)
     return redirect("main")
+
+
+def post_add_view(request):
+    form = PostForm()
+    if request.method == 'POST':
+        form = PostForm(data=request.POST, initial={"user": request.user})
+        if form.is_valid():
+            form.save()
+            return redirect("main")
+    return render(request, "web/post_form.html", {"form": form})

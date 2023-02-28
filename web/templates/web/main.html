@@ -3,4 +3,17 @@
     {%  if not user.is_anonymous %}
         <p>Вы авторизованы как <b>{{ user.username }}</b></p>
     {%  endif %}
+
+    <a href="{% url 'posts_add' %}">Создать пост</a>
+
+    <ul>
+        {% for post in posts %}
+            <li>
+                <b>{{ post.art_type }}</b>
+                • Потрачено часов: {{ post.hours_spent }}
+                <br>Использованные материалы: {{ post.used_material }}
+                <br>{{ post.description }}
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock %}
