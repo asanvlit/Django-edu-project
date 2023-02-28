@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.shortcuts import render, redirect
 
-from web.forms import RegistrationForm, AuthForm, PostForm
+from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm
 from web.models import Post, PostTag
 
 User = get_user_model()
@@ -64,4 +64,16 @@ def post_edit_view(request, id=None):
 
 def tags_view(request):
     tags = PostTag.objects.all()
-    return render(request, "web/tags.html", {"tags": tags})
+    form = PostTagForm()
+    if request.method == 'POST':
+        form = PostTagForm(data=request.POST, initial={"user": request.user})
+        if form.is_valid():
+            form.save()
+            return redirect('tags')
+    return render(request, "web/tags.html", {"tags": tags, "form": form})
+
+
+def tags_delete_view(request, id):
+    tag = PostTag.objects.get(id=id)
+    tag.delete()
+    return redirect('tags')

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
-from web.models import Post
+from web.models import Post, PostTag
 
 User = get_user_model()
 
@@ -33,3 +33,13 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ('art_type', 'hours_spent', 'used_material', 'description', 'artwork', "tags")
+
+
+class PostTagForm(forms.ModelForm):
+    def save(self, commit=True):
+        self.instance.user = self.initial['user']
+        return super().save(commit)
+
+    class Meta:
+        model = PostTag
+        fields = ('title',)
