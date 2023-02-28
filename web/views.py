@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model, authenticate, login, logout
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm
 from web.models import Post, PostTag
@@ -8,9 +8,10 @@ User = get_user_model()
 
 
 def main_view(request):
-    posts = Post.objects.all()
+    posts = Post.objects.all().order_by('-created_at')
     return render(request, "web/main.html", {
-        'posts': posts
+        'posts': posts,
+        'form': PostForm()
     })
 
 
@@ -52,7 +53,7 @@ def logout_view(request):
 
 
 def post_edit_view(request, id=None):
-    post = Post.objects.get(id=id) if id is not None else None
+    post = get_object_or_404(Post, id=id) if id is not None else None
     form = PostForm(instance=post)
     if request.method == 'POST':
         form = PostForm(data=request.POST, files=request.FILES, instance=post, initial={"user": request.user})
@@ -60,6 +61,12 @@ def post_edit_view(request, id=None):
             form.save()
             return redirect("main")
     return render(request, "web/post_form.html", {"form": form})
+
+
+def post_delete_view(request, id):
+    post = get_object_or_404(Post, id=id)
+    post.delete()
+    return redirect('main')
 
 
 def tags_view(request):
@@ -74,6 +81,6 @@ def tags_view(request):
 
 
 def tags_delete_view(request, id):
-    tag = PostTag.objects.get(id=id)
+    tag = get_object_or_404(PostTag, id=id)
     tag.delete()
     return redirect('tags')

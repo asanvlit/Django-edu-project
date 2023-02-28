@@ -1,14 +1,24 @@
 {% extends 'web/base.html' %}
 {% block content %}
+    <b>Добавить пост</b>
+    <form action="{% url 'posts_add' %}" method="post" enctype="multipart/form-data">
+        {%  csrf_token %}
+        {{  form.as_p }}
+        <button>Сохранить</button>
+    </form>
+
     <ul>
         {% for post in posts %}
             <li>
                 <b>{{ post.art_type }}</b>
                 • Потрачено часов: {{ post.hours_spent }}
-                <br>Использованные материалы: {{ post.used_material }}
-                <br><a href="{% url 'posts_edit' post.id %}">Изменить</a>
+                <a href="{% url 'posts_edit' post.id %}">Изменить</a>
+                <a href="{% url 'posts_delete' post.id %}">Удалить</a>
+                <br><img src="{{ post.artwork.url }}"/>
+                <br><b>Использованные материалы</b>: {{ post.used_material }}
                 <br>{{ post.description }}
             </li>
+            <br>
         {% endfor %}
     </ul>
 {% endblock %}
