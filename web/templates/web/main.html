@@ -12,6 +12,7 @@
                 <b>{{ post.art_type }}</b>
                 • Потрачено часов: {{ post.hours_spent }}
                 <br>Использованные материалы: {{ post.used_material }}
+                <br><a href="{% url 'posts_edit' post.id %}">Изменить</a>
                 <br>{{ post.description }}
             </li>
         {% endfor %}

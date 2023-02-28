@@ -51,10 +51,11 @@ def logout_view(request):
     return redirect("main")
 
 
-def post_add_view(request):
-    form = PostForm()
+def post_edit_view(request, id=None):
+    post = Post.objects.get(id=id) if id is not None else None
+    form = PostForm(instance=post)
     if request.method == 'POST':
-        form = PostForm(data=request.POST, initial={"user": request.user})
+        form = PostForm(data=request.POST, instance=post, initial={"user": request.user})
         if form.is_valid():
             form.save()
             return redirect("main")
