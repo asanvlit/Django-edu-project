@@ -20,6 +20,18 @@ def main_view(request):
     if filters['search']:
         posts = posts.filter(art_type__icontains=filters['search'])
 
+    if filters['hours_spent'] is not None:
+        if filters['hours_spent']:
+            posts = posts.filter(hours_spent__lt=25)
+        elif not filters['hours_spent']:
+            posts = posts.filter(hours_spent__gt=24)
+
+    if filters['published_at_after']:
+        posts = posts.filter(created_at__gte=filters['published_at_after'])
+
+    if filters['published_at_before']:
+        posts = posts.filter(created_at__lte=filters['published_at_before'])
+
     total_count = posts.count()
     page_number = request.GET.get("page", 1)
     paginator = Paginator(posts, per_page=10)
