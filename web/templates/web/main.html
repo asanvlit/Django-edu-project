@@ -36,9 +36,11 @@
                 <a href="{% url 'posts_edit' post.id %}">Изменить</a>
                 <a href="{% url 'posts_delete' post.id %}">Удалить</a>
                 <br>
-                {% if post.tags.all %}
-                    <small>[{% for tag in post.tags.all %} {{ tag.title }} {% endfor %}]</small>
-                {% endif %}
+                <small>
+                    {% if post.tags.all %}
+                        [{{ post.tags_count }}{% for tag in post.tags.all %} {{ tag.title }} {% endfor %}]
+                    {% endif %}
+                </small>
                 {% if  post.artwork.url != '' %}
                     <br>
                     <img src="{{ post.artwork.url }}"/>

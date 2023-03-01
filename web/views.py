@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Count, Max, Min, Q
+from django.db.models.functions import TruncDate
 from django.shortcuts import render, redirect, get_object_or_404
 
 from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm, PostFilterForm
@@ -33,7 +35,9 @@ def main_view(request):
         posts = posts.filter(created_at__lte=filters['published_at_before'])
 
     total_count = posts.count()
-    posts = posts.prefetch_related("tags").select_related("user")
+    posts = posts.prefetch_related("tags").select_related("user").annotate(
+        tags_count=Count("tags")
+    )
     page_number = request.GET.get("page", 1)
     paginator = Paginator(posts, per_page=10)
 
@@ -42,6 +46,30 @@ def main_view(request):
         'form': PostForm(),
         'filter_form': filter_form,
         'total_count': total_count
+    })
+
+
+@login_required
+def analytics_view(request):
+    overall_stat = Post.objects.aggregate(
+        count=Count("id"),
+        max_date=Max("created_at"),
+        min_date=Min("created_at")
+    )
+    days_stat = (
+        Post.objects.exclude(hours_spent__isnull=True)
+        .annotate(date=TruncDate("created_at"))
+        .values("date")
+        .annotate(
+            count=Count("id"),
+            more_one_day_spent_count=Count("id", filter=Q(hours_spent__gt=24)),
+        )
+        .order_by('-date')
+    )
+
+    return render(request, "web/analytics.html", {
+        "overall_stat": overall_stat,
+        'days_stat': days_stat
     })
 
 
