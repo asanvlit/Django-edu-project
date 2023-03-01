@@ -14,7 +14,10 @@
                 • Потрачено часов: {{ post.hours_spent }}
                 <a href="{% url 'posts_edit' post.id %}">Изменить</a>
                 <a href="{% url 'posts_delete' post.id %}">Удалить</a>
-                <br><img src="{{ post.artwork.url }}"/>
+                <br>
+                {% if  post.artwork.url != '' %}
+                    <img src="{{ post.artwork.url }}"/>
+                {% endif %}
                 <br><b>Использованные материалы</b>: {{ post.used_material }}
                 <br>{{ post.description }}
             </li>
