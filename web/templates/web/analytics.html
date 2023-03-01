@@ -1,0 +1,17 @@
+{% extends 'web/base.html' %}
+{% block content %}
+    <h3>Аналитика</h3>
+    <p>
+        Всего <b>{{ overall_stat.count }}</b> постов.
+        Дата последнего поста {{ overall_stat.max_date }}.
+        Дата первого поста {{ overall_stat.min_date }}.
+    </p>
+
+    <b>Статистика по дням</b>
+    <ul>
+        {% for day_stat in days_stat %}
+            <li><b>{{ day_stat.date }}</b> - {{ day_stat.count }} постов,
+                {{ day_stat.more_one_day_spent_count }} постов с работами, на которые затрачено более одного дня</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

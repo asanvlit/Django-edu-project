@@ -1,9 +1,15 @@
 {% extends 'web/base.html' %}
 {% block content %}
-    <h2>Публикация работы</h2>
-    <form action="" method="post" enctype="multipart/form-data">
-        {%  csrf_token %}
-        {{ form.as_p }}
-        <button>Создать</button>
-    </form>
+    <div>
+        <h3>Добавить пост</h3>
+        <form action="" method="post" enctype="multipart/form-data">
+            {%  csrf_token %}
+    {#        {{ form.as_p }}#}
+            {% for field in form %}
+                {{ field.label_tag }}<br>
+                {{ field }}<br>
+            {% endfor %}
+            <button>Сохранить</button>
+        </form>
+    </div>
 {% endblock %}

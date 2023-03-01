@@ -1,24 +1,69 @@
 {% extends 'web/base.html' %}
 {% block content %}
-    <b>Добавить пост</b>
-    <form action="{% url 'posts_add' %}" method="post" enctype="multipart/form-data">
-        {%  csrf_token %}
-        {{  form.as_p }}
-        <button>Сохранить</button>
+    <div>
+        <h3>Добавить пост</h3>
+        <form action="{% url 'posts_add' %}" method="post" enctype="multipart/form-data">
+            {%  csrf_token %}
+    {#        {{ form.as_p }}#}
+            {% for field in form %}
+                {{ field.label_tag }}<br>
+                {{ field }}<br>
+            {% endfor %}
+            <button>Сохранить</button>
+        </form>
+    </div>
+
+    <hr>
+    <form action="">
+        <b>Фильтры:</b><br>
+
+        {% for field in filter_form %}
+            {{ field.label }}
+            {{ field }}
+        {%  endfor %}
+
+        <button>Найти</button>
+
+        <a href="?">Показать всё</a>
     </form>
 
     <ul>
         {% for post in posts %}
             <li>
+                <b>{{ post.user.username }}</b><br>
                 <b>{{ post.art_type }}</b>
                 • Потрачено часов: {{ post.hours_spent }}
                 <a href="{% url 'posts_edit' post.id %}">Изменить</a>
                 <a href="{% url 'posts_delete' post.id %}">Удалить</a>
-                <br><img src="{{ post.artwork.url }}"/>
+                <br>
+                <small>
+                    {% if post.tags.all %}
+                        [{{ post.tags_count }}{% for tag in post.tags.all %} {{ tag.title }} {% endfor %}]
+                    {% endif %}
+                </small>
+                {% if  post.artwork.url != '' %}
+                    <br>
+                    <img src="{{ post.artwork.url }}"/>
+                {% endif %}
                 <br><b>Использованные материалы</b>: {{ post.used_material }}
                 <br>{{ post.description }}
             </li>
             <br>
         {% endfor %}
     </ul>
+
+    всего {{ total_count }} записей. {{ posts|length }} на этой странице
+    <nav>
+        {% if posts.has_previous %}
+            <a href="?page=1">в начало</a>
+            <a href="?page={{ posts.previous_page_number }}">предыдущая страница</a>
+        {% endif %}
+
+        страница {{ posts.number }} из {{ posts.paginator.num_pages }}
+
+        {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}">следующая страница</a>
+            <a href="?page={{ posts.paginator.num_pages }}">в конец</a>
+        {% endif %}
+    </nav>
 {% endblock %}

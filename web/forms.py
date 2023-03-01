@@ -43,3 +43,31 @@ class PostTagForm(forms.ModelForm):
     class Meta:
         model = PostTag
         fields = ('title',)
+
+
+class PostFilterForm(forms.Form):
+    search = forms.CharField(label='', widget=forms.TextInput(attrs={"placeholder": "Поиск"}), required=False)
+    hours_spent = forms.NullBooleanField(
+        label='Потрачено времени',
+        widget=forms.Select(
+            choices=(
+                ('unknown', 'Неизвестно'),
+                ('true', 'В течение дня'),
+                ('false', 'Больше одного дня')
+            )
+        )
+    )
+    published_at_after = forms.DateTimeField(
+        label='От',
+        widget=forms.DateTimeInput(
+            attrs={"type": "datetime-local"}, format='%Y-%m-%dT%H:%M'
+        ),
+        required=False
+    )
+    published_at_before = forms.DateTimeField(
+        label='До',
+        widget=forms.DateTimeInput(
+            attrs={"type": "datetime-local"}, format='%Y-%m-%dT%H:%M'
+        ),
+        required=False
+    )
