@@ -13,15 +13,22 @@ User = get_user_model()
 def main_view(request):
     posts = Post.objects.filter(user=request.user).order_by('-created_at')
 
+    filter_form = PostFilterForm(request.GET)
+    filter_form.is_valid()
+    filters = filter_form.cleaned_data
+
+    if filters['search']:
+        posts = posts.filter(art_type__icontains=filters['search'])
+
+    total_count = posts.count()
     page_number = request.GET.get("page", 1)
     paginator = Paginator(posts, per_page=10)
-
-    filter_form = PostFilterForm()
 
     return render(request, "web/main.html", {
         'posts': paginator.get_page(page_number),
         'form': PostForm(),
-        'filter_form': filter_form
+        'filter_form': filter_form,
+        'total_count': total_count
     })
 
 

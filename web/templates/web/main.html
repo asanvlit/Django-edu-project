@@ -1,15 +1,21 @@
 {% extends 'web/base.html' %}
 {% block content %}
-    <b>Добавить пост</b>
-    <form action="{% url 'posts_add' %}" method="post" enctype="multipart/form-data">
-        {%  csrf_token %}
-        {{  form.as_p }}
-        <button>Сохранить</button>
-    </form>
+    <div>
+        <h3>Добавить пост</h3>
+        <form action="{% url 'posts_add' %}" method="post" enctype="multipart/form-data">
+            {%  csrf_token %}
+    {#        {{ form.as_p }}#}
+            {% for field in form %}
+                {{ field.label_tag }}<br>
+                {{ field }}<br>
+            {% endfor %}
+            <button>Сохранить</button>
+        </form>
+    </div>
 
     <hr>
     <form action="">
-        <b>Фильтры:</b>
+        <b>Фильтры:</b><br>
 
         {% for field in filter_form %}
             {{ field }}
@@ -35,6 +41,8 @@
             <br>
         {% endfor %}
     </ul>
+
+    всего {{ total_count }} записей. {{ posts|length }} на этой странице
     <nav>
         {% if posts.has_previous %}
             <a href="?page=1">в начало</a>

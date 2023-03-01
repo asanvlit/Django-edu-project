@@ -43,3 +43,7 @@ class PostTagForm(forms.ModelForm):
     class Meta:
         model = PostTag
         fields = ('title',)
+
+
+class PostFilterForm(forms.Form):
+    search = forms.CharField(widget=forms.TextInput(attrs={"placeholder": "Поиск"}), required=False)
