@@ -33,6 +33,7 @@ def main_view(request):
         posts = posts.filter(created_at__lte=filters['published_at_before'])
 
     total_count = posts.count()
+    posts = posts.prefetch_related("tags").select_related("user")
     page_number = request.GET.get("page", 1)
     paginator = Paginator(posts, per_page=10)
 
