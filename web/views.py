@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 
-from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm
+from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm, PostFilterForm
 from web.models import Post, PostTag
 
 User = get_user_model()
@@ -11,9 +12,16 @@ User = get_user_model()
 @login_required
 def main_view(request):
     posts = Post.objects.filter(user=request.user).order_by('-created_at')
+
+    page_number = request.GET.get("page", 1)
+    paginator = Paginator(posts, per_page=10)
+
+    filter_form = PostFilterForm()
+
     return render(request, "web/main.html", {
-        'posts': posts,
-        'form': PostForm()
+        'posts': paginator.get_page(page_number),
+        'form': PostForm(),
+        'filter_form': filter_form
     })
 
 
