@@ -26,6 +26,13 @@ class Post(models.Model):
     tags = models.ManyToManyField(PostTag, verbose_name='Теги')
     artwork = models.ImageField(upload_to='artworks/', null=True, blank=True, verbose_name='Работа')
 
+    def __str__(self):
+        return self.art_type
+
+    class Meta:
+        verbose_name = 'пост'
+        verbose_name_plural = 'посты'
+
 
 class Like(models.Model):
     created_at = models.DateTimeField()
