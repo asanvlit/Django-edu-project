@@ -13,6 +13,7 @@ class PostTag(models.Model):
 
     class Meta:
         verbose_name = 'тег'
+        verbose_name_plural = 'теги'
 
 
 class Post(models.Model):
@@ -25,6 +26,13 @@ class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
     tags = models.ManyToManyField(PostTag, verbose_name='Теги')
     artwork = models.ImageField(upload_to='artworks/', null=True, blank=True, verbose_name='Работа')
+
+    def __str__(self):
+        return self.art_type
+
+    class Meta:
+        verbose_name = 'пост'
+        verbose_name_plural = 'посты'
 
 
 class Like(models.Model):
