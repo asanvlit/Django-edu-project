@@ -3,10 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Max, Min, Q
 from django.db.models.functions import TruncDate
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
-from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm, PostFilterForm
+from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm, PostFilterForm, ImportForm
 from web.models import Post, PostTag
+from web.services import filter_posts, export_posts_csv, import_posts_from_csv
 
 User = get_user_model()
 
@@ -17,22 +19,7 @@ def main_view(request):
 
     filter_form = PostFilterForm(request.GET)
     filter_form.is_valid()
-    filters = filter_form.cleaned_data
-
-    if filters['search']:
-        posts = posts.filter(art_type__icontains=filters['search'])
-
-    if filters['hours_spent'] is not None:
-        if filters['hours_spent']:
-            posts = posts.filter(hours_spent__lt=25)
-        elif not filters['hours_spent']:
-            posts = posts.filter(hours_spent__gt=24)
-
-    if filters['published_at_after']:
-        posts = posts.filter(created_at__gte=filters['published_at_after'])
-
-    if filters['published_at_before']:
-        posts = posts.filter(created_at__lte=filters['published_at_before'])
+    posts = filter_posts(posts, filter_form.cleaned_data)
 
     total_count = posts.count()
     posts = posts.prefetch_related("tags").select_related("user").annotate(
@@ -41,11 +28,30 @@ def main_view(request):
     page_number = request.GET.get("page", 1)
     paginator = Paginator(posts, per_page=10)
 
+    if request.GET.get("export") == 'csv':
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={"Content-Disposition": "attachment; filename=posts.csv"}
+        )
+        return export_posts_csv(posts, response)
+
     return render(request, "web/main.html", {
         'posts': paginator.get_page(page_number),
         'form': PostForm(),
         'filter_form': filter_form,
         'total_count': total_count
+    })
+
+
+@login_required
+def import_view(request):
+    if request.method == "POST":
+        form = ImportForm(files=request.FILES)
+        if form.is_valid():
+            import_posts_from_csv(form.cleaned_data['file'], request.user.id)
+            return redirect("main")
+    return render(request, "web/import.html", {
+        "form": ImportForm()
     })
 
 
