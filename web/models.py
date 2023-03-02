@@ -13,6 +13,7 @@ class PostTag(models.Model):
 
     class Meta:
         verbose_name = 'тег'
+        verbose_name_plural = 'теги'
 
 
 class Post(models.Model):
