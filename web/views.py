@@ -5,14 +5,17 @@ from django.db.models import Count, Max, Min, Q
 from django.db.models.functions import TruncDate
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.cache import cache_page
 
 from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm, PostFilterForm, ImportForm
 from web.models import Post, PostTag
-from web.services import filter_posts, export_posts_csv, import_posts_from_csv
+from web.services import filter_posts, export_posts_csv, import_posts_from_csv, get_stat
+from yartone.redis import get_redis_client
 
 User = get_user_model()
 
 
+@cache_page(60)
 @login_required
 def main_view(request):
     posts = Post.objects.filter(user=request.user).order_by('-created_at')
@@ -26,7 +29,7 @@ def main_view(request):
         tags_count=Count("tags")
     )
     page_number = request.GET.get("page", 1)
-    paginator = Paginator(posts, per_page=10)
+    paginator = Paginator(posts, per_page=1000)
 
     if request.GET.get("export") == 'csv':
         response = HttpResponse(
@@ -52,6 +55,13 @@ def import_view(request):
             return redirect("main")
     return render(request, "web/import.html", {
         "form": ImportForm()
+    })
+
+
+@login_required
+def stat_view(request):
+    return render(request, "web/stat.html", {
+        "results": get_stat()
     })
 
 

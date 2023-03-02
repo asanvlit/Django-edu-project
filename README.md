@@ -6,6 +6,7 @@
 
 * Django
 * PostgreSQL
+* Redis
 
 ## Запуск проекта для разработки:
 
