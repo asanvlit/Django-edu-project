@@ -1,6 +1,7 @@
 import csv
 
 from web.models import Post, PostTag
+from yartone.redis import get_redis_client
 
 
 def filter_posts(posts_qs, filters):
@@ -59,3 +60,11 @@ def import_posts_from_csv(file, user_id):
             post_tags.append(
                 Post.tags.through(post_id=post.id, posttag_id=tag_id)
             )
+
+
+def get_stat():
+    redis = get_redis_client()
+    keys = redis.keys("stat_*")
+    return [(key.decode().replace("stat_", ''), redis.get(key).decode())
+            for key in keys
+            ]
