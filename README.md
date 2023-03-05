@@ -4,7 +4,7 @@
 
 ## Использованные технологии:
 
-* Django
+* Django, Django REST
 * PostgreSQL
 * Redis
 
