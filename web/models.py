@@ -39,3 +39,9 @@ class Like(models.Model):
     created_at = models.DateTimeField()
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
     post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name='Пост')
+
+
+class Subscription(models.Model):
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Подписчик", related_name="follower")
+    follows = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Подписка", related_name="follows")

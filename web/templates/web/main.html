@@ -1,17 +1,33 @@
 {% extends 'web/base.html' %}
 {% block content %}
-    <div>
-        <h3>Добавить пост</h3>
-        <form action="{% url 'posts_add' %}" method="post" enctype="multipart/form-data">
-            {%  csrf_token %}
-    {#        {{ form.as_p }}#}
-            {% for field in form %}
-                {{ field.label_tag }}<br>
-                {{ field }}<br>
-            {% endfor %}
-            <button>Сохранить</button>
-        </form>
-    </div>
+    {% if not is_guest %}
+        <div>
+            <h3>Добавить пост</h3>
+            <form action="{% url 'posts_add' %}" method="post" enctype="multipart/form-data">
+                {%  csrf_token %}
+        {#        {{ form.as_p }}#}
+                {% for field in form %}
+                    {{ field.label_tag }}<br>
+                    {{ field }}<br>
+                {% endfor %}
+                <button>Сохранить</button>
+            </form>
+        </div>
+    {% else %}
+        <h3>Профиль пользователя <b>{{ profile.username }}</b></h3>
+        {% if subscription is None%}
+            <form action="{% url 'subscriptions_add'%}" method="post">
+                {% csrf_token %}
+                <input name="follows" value={{ profile.id }} style="display:none;">
+                <button>Подписаться</button>
+            </form>
+        {% else %}
+            <form action="{% url 'subscriptions_delete' subscription.id %}" method="post">
+                {% csrf_token %}
+                <button>Отписаться</button>
+            </form>
+        {% endif %}
+    {% endif %}
 
     <hr>
     <form action="">
