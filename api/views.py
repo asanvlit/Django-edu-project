@@ -1,5 +1,7 @@
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
 from api.serializers import PostSerializer
 from web.models import Post
@@ -11,8 +13,8 @@ def main_view(request):
     return Response({"status": "ok"})
 
 
-@api_view(["GET"])
-def posts_view(request):
-    posts = Post.objects.all().select_related("user").prefetch_related("tags")
-    serializer = PostSerializer(posts, many=True)
-    return Response(serializer.data)
+class PostModelViewSet(ModelViewSet):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        return Post.objects.all().select_related("user").prefetch_related("tags").filter(user=self.request.user)
