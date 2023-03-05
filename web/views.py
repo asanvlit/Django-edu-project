@@ -3,22 +3,32 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Max, Min, Q
 from django.db.models.functions import TruncDate
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.cache import cache_page
 
-from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm, PostFilterForm, ImportForm
-from web.models import Post, PostTag
+from web.forms import RegistrationForm, AuthForm, PostForm, PostTagForm, PostFilterForm, ImportForm, SubscriptionForm
+from web.models import Post, PostTag, Subscription
 from web.services import filter_posts, export_posts_csv, import_posts_from_csv, get_stat
-from yartone.redis import get_redis_client
 
 User = get_user_model()
 
 
-@cache_page(60)
+@cache_page(10)
 @login_required
 def main_view(request):
-    posts = Post.objects.filter(user=request.user).order_by('-created_at')
+    is_guest = False
+    subscription = None
+    if (request.GET.get("id") is not None) and (int(request.GET.get("id")) != request.user.id):
+        user = get_object_or_404(User, id=request.GET.get("id"))
+        is_guest = True
+        try:
+            subscription = Subscription.objects.get(follower_id=request.user.id, follows_id=int(request.GET.get("id")))
+        except Subscription.DoesNotExist:
+            subscription = None
+    else:
+        user = request.user
+    posts = Post.objects.filter(user=user).order_by('-created_at')
 
     filter_form = PostFilterForm(request.GET)
     filter_form.is_valid()
@@ -29,7 +39,7 @@ def main_view(request):
         tags_count=Count("tags")
     )
     page_number = request.GET.get("page", 1)
-    paginator = Paginator(posts, per_page=1000)
+    paginator = Paginator(posts, per_page=10)
 
     if request.GET.get("export") == 'csv':
         response = HttpResponse(
@@ -39,8 +49,12 @@ def main_view(request):
         return export_posts_csv(posts, response)
 
     return render(request, "web/main.html", {
+        'is_guest': is_guest,
+        'profile': user,
         'posts': paginator.get_page(page_number),
         'form': PostForm(),
+        'subscription_form': SubscriptionForm(),
+        'subscription': subscription,
         'filter_form': filter_form,
         'total_count': total_count
     })
@@ -162,3 +176,28 @@ def tags_delete_view(request, id):
     tag = get_object_or_404(PostTag, user=request.user, id=id)
     tag.delete()
     return redirect('tags')
+
+
+@login_required
+def subscriptions_add_view(request):
+    if request.method == 'POST':
+        form = SubscriptionForm(data=request.POST, initial={"user": request.user})
+        if form.is_valid():
+            form.save()
+            redirect_url = '/?id=' + str(form.cleaned_data.get('follows').id)
+            return redirect(redirect_url)
+    return redirect('main')
+
+
+@login_required
+def subscriptions_delete_view(request, id):
+    subscription = get_object_or_404(Subscription, id=id)
+    subscription.delete()
+    redirect_url = '/?id=' + str(subscription.follows_id)
+    return redirect(redirect_url)
+
+
+@login_required
+def subscriptions_view(request):
+    subscriptions = Subscription.objects.filter(follower=request.user)
+    return render(request, "web/subscriptions.html", {"subscriptions": subscriptions})

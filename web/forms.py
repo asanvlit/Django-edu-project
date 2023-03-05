@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
-from web.models import Post, PostTag
+from web.models import Post, PostTag, Subscription
 
 User = get_user_model()
 
@@ -43,6 +43,16 @@ class PostTagForm(forms.ModelForm):
     class Meta:
         model = PostTag
         fields = ('title',)
+
+
+class SubscriptionForm(forms.ModelForm):
+    def save(self, commit=True):
+        self.instance.follower = self.initial['user']
+        return super().save(commit)
+
+    class Meta:
+        model = Subscription
+        fields = ("follows",)
 
 
 class PostFilterForm(forms.Form):

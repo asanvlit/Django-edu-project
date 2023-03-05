@@ -1,0 +1,9 @@
+{% extends 'web/base.html' %}
+{% block content %}
+    <h2>Подписки</h2>
+    <ul>
+        {%  for s in subscriptions %}
+            <li><a href="{% url 'main' %}?id={{ s.follows.id }}">{{ s.follows.username }}</a></li>
+        {%  endfor %}
+    </ul>
+{% endblock %}
