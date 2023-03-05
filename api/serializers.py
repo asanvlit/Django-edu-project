@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from web.models import User, PostTag, Post
 
@@ -20,10 +21,17 @@ class PostSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     tag_ids = serializers.PrimaryKeyRelatedField(queryset=PostTag.objects.all(), many=True, write_only=True)
 
+    def validate(self, attrs):
+        if attrs['hours_spent'] < 0:
+            raise ValidationError("Incorrect hours count")
+        return attrs
+
     def save(self, **kwargs):
-        tag_ids = self.validated_data.pop("tag_ids")
+        tags = self.validated_data.pop("tag_ids")
         self.validated_data['user_id'] = self.context['request'].user.id
-        return super().save(**kwargs)
+        instance = super().save(**kwargs)
+        instance.tags.set(tags)
+        return instance
 
     class Meta:
         model = Post
